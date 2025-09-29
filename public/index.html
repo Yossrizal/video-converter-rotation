@@ -53,6 +53,7 @@
             <option value="crop">Center crop (isi penuh)</option>
         </select>
 
+        <button id="startBtn" type="button" class="hidden">Start</button>
         <progress id="prog" value="0" max="100" class="hidden"></progress>
     </div>
 
@@ -63,6 +64,8 @@
         const prog = document.getElementById('prog');
         const fname = document.getElementById('fname');
         const modeSel = document.getElementById('mode');
+        const startBtn = document.getElementById('startBtn');
+        let selectedFile = null;
 
         pickBtn.onclick = () => fileInput.click();
 
@@ -93,6 +96,7 @@
                     xhr.response.text().then(t => alert(t || 'Upload failed'));
                 }
                 prog.classList.add('hidden'); prog.value = 0;
+                startBtn.classList.add('hidden');
             };
 
             const fd = new FormData();
@@ -104,8 +108,17 @@
             if (!file) return;
             if (file.type !== 'video/mp4') { alert('Harap upload file MP4'); return; }
             fname.textContent = file.name;
-            upload(file);
+            selectedFile = file;
+            startBtn.classList.remove('hidden');
         }
+
+        startBtn.onclick = () => {
+            if (selectedFile) {
+                prog.classList.remove('hidden');
+                upload(selectedFile);
+                startBtn.classList.add('hidden');
+            }
+        };
 
         drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag'); });
         drop.addEventListener('dragleave', () => drop.classList.remove('drag'));
