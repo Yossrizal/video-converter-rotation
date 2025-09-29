@@ -1,0 +1,117 @@
+<!-- public/index.html -->
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Landscape → Vertical 9:16</title>
+    <style>
+        body {
+            font-family: system-ui, Arial;
+            margin: 40px
+        }
+
+        .drop {
+            border: 2px dashed #999;
+            border-radius: 12px;
+            padding: 28px;
+            text-align: center
+        }
+
+        .drop.drag {
+            border-color: #333
+        }
+
+        .hidden {
+            display: none
+        }
+
+        progress {
+            width: 100%
+        }
+
+        label {
+            display: block;
+            margin: 12px 0 6px
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Upload MP4 → 9:16</h1>
+
+    <div class="drop" id="drop">
+        <input id="file" type="file" name="video" accept="video/mp4" class="hidden" />
+        <p><strong>Drag & drop</strong> MP4 di sini, atau <button id="pick" type="button">Pilih file</button></p>
+        <p id="fname"></p>
+
+        <label for="mode">Mode</label>
+        <select id="mode">
+            <option value="blur">Blur background (disarankan)</option>
+            <option value="pad">Pad warna solid</option>
+            <option value="crop">Center crop (isi penuh)</option>
+        </select>
+
+        <progress id="prog" value="0" max="100" class="hidden"></progress>
+    </div>
+
+    <script>
+        const drop = document.getElementById('drop');
+        const fileInput = document.getElementById('file');
+        const pickBtn = document.getElementById('pick');
+        const prog = document.getElementById('prog');
+        const fname = document.getElementById('fname');
+        const modeSel = document.getElementById('mode');
+
+        pickBtn.onclick = () => fileInput.click();
+
+        function upload(file) {
+            const xhr = new XMLHttpRequest();
+            const mode = modeSel.value;
+            xhr.open('POST', '/upload?mode=' + encodeURIComponent(mode));
+            xhr.responseType = 'blob';
+
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    prog.classList.remove('hidden');
+                    prog.value = Math.round((e.loaded / e.total) * 100);
+                }
+            };
+
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    const url = URL.createObjectURL(xhr.response);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = file.name.replace(/\.mp4$/i, '') + '-vertical.mp4';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                } else {
+                    xhr.response.text().then(t => alert(t || 'Upload failed'));
+                }
+                prog.classList.add('hidden'); prog.value = 0;
+            };
+
+            const fd = new FormData();
+            fd.append('video', file);
+            xhr.send(fd);
+        }
+
+        function handleFile(file) {
+            if (!file) return;
+            if (file.type !== 'video/mp4') { alert('Harap upload file MP4'); return; }
+            fname.textContent = file.name;
+            upload(file);
+        }
+
+        drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag'); });
+        drop.addEventListener('dragleave', () => drop.classList.remove('drag'));
+        drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('drag'); handleFile(e.dataTransfer.files[0]); });
+        fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
+    </script>
+</body>
+
+</html>
