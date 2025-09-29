@@ -31,6 +31,8 @@
 
 ## **🎬 How to Slay**
 
+![App Preview](public/preview.png)
+
 1.  **Start the Server**:
     ```bash
     npm start
