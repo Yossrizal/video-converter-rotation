@@ -51,6 +51,7 @@
         const spinner = document.getElementById('spinner');
         const notification = document.getElementById('notification');
         let selectedFile = null;
+        const MAX_FILENAME_LENGTH = 30;
 
         pickBtn.onclick = () => fileInput.click();
 
@@ -107,7 +108,13 @@
         function handleFile(file) {
             if (!file) return;
             if (file.type !== 'video/mp4') { alert('Harap upload file MP4'); return; }
-            fname.textContent = file.name;
+            
+            let displayFileName = file.name;
+            if (file.name.length > MAX_FILENAME_LENGTH) {
+                displayFileName = file.name.substring(0, MAX_FILENAME_LENGTH - 3) + '...';
+            }
+            fname.textContent = displayFileName;
+
             selectedFile = file;
             startBtn.classList.remove('hidden');
             resetBtn.classList.remove('hidden');
@@ -123,9 +130,9 @@
             }
         };
 
-        drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('drag'); });
-        drop.addEventListener('dragleave', () => drop.classList.remove('drag'));
-        drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('drag'); handleFile(e.dataTransfer.files[0]); });
+        drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('border-blue-500', 'bg-blue-50'); });
+        drop.addEventListener('dragleave', () => drop.classList.remove('border-blue-500', 'bg-blue-50'));
+        drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('border-blue-500', 'bg-blue-50'); handleFile(e.dataTransfer.files[0]); });
         fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
     </script>
 </body>
