@@ -18,7 +18,7 @@ export async function handleUpload(req, res) {
     else                     await toVerticalBlur(inputPath, outputPath);
 
     // kirim hasil sebagai unduhan lalu bersihkan file
-    res.download(outputPath, outName, err => {
+    res.sendFile(outputPath, { root: '.' }, err => {
       safeUnlink(inputPath);
       safeUnlink(outputPath);
       if (err) console.error(err);

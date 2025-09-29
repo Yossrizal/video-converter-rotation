@@ -11,7 +11,7 @@
 </head>
 
 <body class="font-sans bg-gray-100 text-gray-900 min-h-screen flex items-center justify-center py-12">
-    <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+    <div class="w-full max-w-lg p-8 space-y-6 bg-white rounded-lg shadow-md">
         <h1 class="text-4xl font-bold text-center mb-8">Upload MP4 → 9:16</h1>
 
         <div class="p-8 border-2 border-dashed border-gray-300 rounded-lg text-center mb-6" id="drop">
@@ -35,11 +35,38 @@
         <progress id="prog" value="0" max="100" class="hidden w-full h-4 bg-gray-200 rounded-full mt-4"></progress>
     </div>
 
+    <div id="preview-container" class="hidden w-full max-w-4xl p-8 mt-6 space-y-6 bg-white rounded-lg shadow-md">
+        <div class="flex items-center justify-center space-x-4">
+            <div class="w-1/2">
+                <h2 class="text-2xl font-bold text-center mb-2">Original</h2>
+            </div>
+            <div class="w-1/2">                
+                <h2 class="text-2xl font-bold text-center mb-2">Converted</h2>
+            </div>
+        </div>  
+        <div class="flex items-center justify-center space-x-4">
+            <div class="w-1/2">
+                <video id="original-video" class="max-w-full" controls style="margin: auto;"></video>
+            </div>
+            <div class="w-1/2">
+                <video id="converted-video" class="max-w-full hidden" controls style="margin: auto;"></video>
+                <button id="downloadBtn" type="button" class="hidden w-full px-4 py-2 mt-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Download</button>
+            </div>
+        </div>
+    </div>
+
+
     <div id="notification" class="hidden fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
         Success! Check your browser for the download.
     </div>
 
     <script>
+        document.getElementById('original-video').addEventListener('loadedmetadata', function() {
+            const originalVideo = document.getElementById('original-video');
+            const convertedVideo = document.getElementById('converted-video');
+            convertedVideo.height = originalVideo.videoHeight;
+        });
+
         const drop = document.getElementById('drop');
         const fileInput = document.getElementById('file');
         const pickBtn = document.getElementById('pick');
@@ -64,6 +91,14 @@
             prog.classList.add('hidden');
             prog.value = 0;
             spinner.classList.add('hidden');
+
+            document.getElementById('preview-container').classList.add('hidden');
+            const originalVideo = document.getElementById('original-video');
+            const convertedVideo = document.getElementById('converted-video');
+            originalVideo.src = '';
+            convertedVideo.src = '';
+            convertedVideo.classList.add('hidden');
+            document.getElementById('downloadBtn').classList.add('hidden');
         }
 
         resetBtn.onclick = reset;
@@ -82,22 +117,33 @@
 
             xhr.onload = () => {
                 if (xhr.status === 200) {
-                    const url = URL.createObjectURL(xhr.response);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = file.name.replace(/\.mp4$/i, '') + '-vertical.mp4';
-                    document.body.appendChild(a);
-                    a.click();
-                    a.remove();
-                    URL.revokeObjectURL(url);
+                    const convertedUrl = URL.createObjectURL(xhr.response);
+                    const convertedVideo = document.getElementById('converted-video');
+                    convertedVideo.src = convertedUrl;
+                    convertedVideo.classList.remove('hidden');
+
+                    const downloadBtn = document.getElementById('downloadBtn');
+                    downloadBtn.classList.remove('hidden');
+                    downloadBtn.onclick = () => {
+                        const a = document.createElement('a');
+                        a.href = convertedUrl;
+                        a.download = file.name.replace(/\.mp4$/i, '') + '-vertical.mp4';
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                    };
+
                     notification.classList.remove('hidden');
                     setTimeout(() => {
                         notification.classList.add('hidden');
                     }, 3000);
+                    document.getElementById('converted-video').classList.remove('hidden');
                 } else {
                     xhr.response.text().then(t => alert(t || 'Upload failed'));
                 }
-                reset();
+                spinner.classList.add('hidden');
+                prog.classList.add('hidden');
+                resetBtn.classList.remove('hidden');
             };
 
             const fd = new FormData();
@@ -116,6 +162,15 @@
             fname.textContent = displayFileName;
 
             selectedFile = file;
+
+            const originalVideo = document.getElementById('original-video');
+            const originalUrl = URL.createObjectURL(file);
+            originalVideo.src = originalUrl;
+
+            document.getElementById('preview-container').classList.remove('hidden');
+            document.getElementById('converted-video').classList.remove('hidden');
+            document.getElementById('downloadBtn').classList.add('hidden');
+
             startBtn.classList.remove('hidden');
             resetBtn.classList.remove('hidden');
         }
@@ -124,6 +179,7 @@
             if (selectedFile) {
                 spinner.classList.remove('hidden');
                 prog.classList.remove('hidden');
+                document.getElementById('converted-video').classList.add('hidden');
                 upload(selectedFile);
                 startBtn.classList.add('hidden');
                 resetBtn.classList.add('hidden');
