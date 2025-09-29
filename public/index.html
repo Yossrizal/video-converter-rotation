@@ -20,6 +20,12 @@
                 <p class="text-lg text-slate-300 mb-4"><strong>Drag & drop</strong> a file or <button id="pick" type="button" class="px-4 py-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow hover:from-blue-500 hover:to-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50">click to select</button></p>
                 <p id="fname" class="text-slate-200 mt-2"></p>
 
+                <label for="title" class="block text-sm font-medium text-slate-200 mt-4 mb-2">Title</label>
+                <input id="title" type="text" name="title" class="block w-full p-2 bg-slate-800 text-slate-100 border border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+
+                <label for="description" class="block text-sm font-medium text-slate-200 mt-4 mb-2">Description</label>
+                <textarea id="description" name="description" rows="3" class="block w-full p-2 bg-slate-800 text-slate-100 border border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+
                 <label for="mode" class="block text-sm font-medium text-slate-200 mt-4 mb-2">Mode</label>
                 <select id="mode" class="block w-full p-2 bg-slate-800 text-slate-100 border border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     <option value="blur">Blur background (disarankan)</option>
@@ -196,6 +202,8 @@
 
             const fd = new FormData();
             fd.append('video', file);
+            fd.append('title', document.getElementById('title').value);
+            fd.append('description', document.getElementById('description').value);
             xhr.send(fd);
         }
 

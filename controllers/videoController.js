@@ -9,13 +9,14 @@ export async function handleUpload(req, res) {
 
   // pilih mode via query ?mode=blur|pad|crop (default: blur)
   const mode = (req.query.mode || "blur").toLowerCase();
+  const { title, description } = req.body;
   const outName = `${Date.now()}-vertical.mp4`;
   const outputPath = path.join("outputs", outName);
 
   try {
-    if (mode === "pad")      await toVerticalPad(inputPath, outputPath);
-    else if (mode === "crop")await toVerticalCrop(inputPath, outputPath);
-    else                     await toVerticalBlur(inputPath, outputPath);
+    if (mode === "pad")      await toVerticalPad(inputPath, outputPath, title, description);
+    else if (mode === "crop")await toVerticalCrop(inputPath, outputPath, title, description);
+    else                     await toVerticalBlur(inputPath, outputPath, title, description);
 
     // kirim hasil sebagai unduhan lalu bersihkan file
     res.sendFile(outputPath, { root: '.' }, err => {
