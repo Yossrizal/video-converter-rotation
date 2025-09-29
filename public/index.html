@@ -6,55 +6,37 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Landscape → Vertical 9:16</title>
-    <style>
-        body {
-            font-family: system-ui, Arial;
-            margin: 40px
-        }
 
-        .drop {
-            border: 2px dashed #999;
-            border-radius: 12px;
-            padding: 28px;
-            text-align: center
-        }
-
-        .drop.drag {
-            border-color: #333
-        }
-
-        .hidden {
-            display: none
-        }
-
-        progress {
-            width: 100%
-        }
-
-        label {
-            display: block;
-            margin: 12px 0 6px
-        }
-    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body>
-    <h1>Upload MP4 → 9:16</h1>
+<body class="font-sans bg-gray-100 text-gray-900 min-h-screen flex items-center justify-center py-12">
+    <div class="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <h1 class="text-4xl font-bold text-center mb-8">Upload MP4 → 9:16</h1>
 
-    <div class="drop" id="drop">
+        <div class="p-8 border-2 border-dashed border-gray-300 rounded-lg text-center mb-6" id="drop">
         <input id="file" type="file" name="video" accept="video/mp4" class="hidden" />
-        <p><strong>Drag & drop</strong> MP4 di sini, atau <button id="pick" type="button">Pilih file</button></p>
-        <p id="fname"></p>
+        <p class="text-lg text-gray-600 mb-4"><strong>Drag & drop</strong> a file or <button id="pick" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">click to select</button></p>
+        <p id="fname" class="text-gray-700 mt-2"></p>
 
-        <label for="mode">Mode</label>
-        <select id="mode">
+        <label for="mode" class="block text-sm font-medium text-gray-700 mt-4 mb-2">Mode</label>
+        <select id="mode" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
             <option value="blur">Blur background (disarankan)</option>
             <option value="pad">Pad warna solid</option>
             <option value="crop">Center crop (isi penuh)</option>
         </select>
 
-        <button id="startBtn" type="button" class="hidden">Start</button>
-        <progress id="prog" value="0" max="100" class="hidden"></progress>
+        <div id="spinner" class="hidden animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto my-4"></div>
+
+        <div class="flex space-x-4 mt-4">
+            <button id="startBtn" type="button" class="hidden w-full px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">Start</button>
+            <button id="resetBtn" type="button" class="hidden w-full px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">Reset</button>
+        </div>
+        <progress id="prog" value="0" max="100" class="hidden w-full h-4 bg-gray-200 rounded-full mt-4"></progress>
+    </div>
+
+    <div id="notification" class="hidden fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
+        Success! Check your browser for the download.
     </div>
 
     <script>
@@ -65,9 +47,25 @@
         const fname = document.getElementById('fname');
         const modeSel = document.getElementById('mode');
         const startBtn = document.getElementById('startBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const spinner = document.getElementById('spinner');
+        const notification = document.getElementById('notification');
         let selectedFile = null;
 
         pickBtn.onclick = () => fileInput.click();
+
+        function reset() {
+            fileInput.value = null;
+            selectedFile = null;
+            fname.textContent = '';
+            startBtn.classList.add('hidden');
+            resetBtn.classList.add('hidden');
+            prog.classList.add('hidden');
+            prog.value = 0;
+            spinner.classList.add('hidden');
+        }
+
+        resetBtn.onclick = reset;
 
         function upload(file) {
             const xhr = new XMLHttpRequest();
@@ -77,7 +75,6 @@
 
             xhr.upload.onprogress = (e) => {
                 if (e.lengthComputable) {
-                    prog.classList.remove('hidden');
                     prog.value = Math.round((e.loaded / e.total) * 100);
                 }
             };
@@ -92,11 +89,14 @@
                     a.click();
                     a.remove();
                     URL.revokeObjectURL(url);
+                    notification.classList.remove('hidden');
+                    setTimeout(() => {
+                        notification.classList.add('hidden');
+                    }, 3000);
                 } else {
                     xhr.response.text().then(t => alert(t || 'Upload failed'));
                 }
-                prog.classList.add('hidden'); prog.value = 0;
-                startBtn.classList.add('hidden');
+                reset();
             };
 
             const fd = new FormData();
@@ -110,13 +110,16 @@
             fname.textContent = file.name;
             selectedFile = file;
             startBtn.classList.remove('hidden');
+            resetBtn.classList.remove('hidden');
         }
 
         startBtn.onclick = () => {
             if (selectedFile) {
+                spinner.classList.remove('hidden');
                 prog.classList.remove('hidden');
                 upload(selectedFile);
                 startBtn.classList.add('hidden');
+                resetBtn.classList.add('hidden');
             }
         };
 
