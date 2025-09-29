@@ -10,18 +10,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body id="appGrid" class="font-sans bg-gray-100 text-gray-900 min-h-screen w-full p-4 sm:p-6 lg:p-8 grid grid-cols-1 gap-6 lg:gap-8 place-items-center">
+<body id="appGrid" class="font-sans bg-slate-950 text-slate-100 min-h-screen w-full p-4 sm:p-6 lg:p-8 grid grid-cols-1 gap-6 lg:gap-8 place-items-center transition-all duration-300 ease-in-out">
     <div class="p-4 h-full">
-        <div id="input-card" class="w-full max-w-lg mx-auto p-8 space-y-6 bg-white rounded-lg shadow-md">
+        <div id="input-card" class="w-full max-w-lg mx-auto p-8 space-y-6 bg-slate-900/60 border border-slate-700 rounded-2xl shadow-lg backdrop-blur transition-all duration-300 ease-in-out">
             <h1 class="text-4xl font-bold text-center mb-8">Upload MP4 → 9:16</h1>
 
-            <div class="p-8 border-2 border-dashed border-gray-300 rounded-lg text-center mb-6" id="drop">
+            <div class="p-8 border-2 border-dashed border-slate-600 rounded-xl text-center mb-6 bg-slate-900/40" id="drop">
                 <input id="file" type="file" name="video" accept="video/mp4" class="hidden" />
-                <p class="text-lg text-gray-600 mb-4"><strong>Drag & drop</strong> a file or <button id="pick" type="button" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">click to select</button></p>
-                <p id="fname" class="text-gray-700 mt-2"></p>
+                <p class="text-lg text-slate-300 mb-4"><strong>Drag & drop</strong> a file or <button id="pick" type="button" class="px-4 py-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow hover:from-blue-500 hover:to-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50">click to select</button></p>
+                <p id="fname" class="text-slate-200 mt-2"></p>
 
-                <label for="mode" class="block text-sm font-medium text-gray-700 mt-4 mb-2">Mode</label>
-                <select id="mode" class="block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                <label for="mode" class="block text-sm font-medium text-slate-200 mt-4 mb-2">Mode</label>
+                <select id="mode" class="block w-full p-2 bg-slate-800 text-slate-100 border border-slate-600 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
                     <option value="blur">Blur background (disarankan)</option>
                     <option value="pad">Pad warna solid</option>
                     <option value="crop">Center crop (isi penuh)</option>
@@ -30,37 +30,61 @@
                 <div id="spinner" class="hidden animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500 mx-auto my-4"></div>
 
                 <div class="flex space-x-4 mt-4">
-                    <button id="startBtn" type="button" class="hidden w-full px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50">Start</button>
-                    <button id="resetBtn" type="button" class="hidden w-full px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50">Reset</button>
+                    <button id="startBtn" type="button" class="hidden w-full px-4 py-2 rounded-full bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow hover:from-blue-500 hover:to-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50">Start</button>
+                    <button id="resetBtn" type="button" class="hidden w-full px-4 py-2 rounded-full bg-gradient-to-r from-rose-600 to-rose-500 text-white shadow hover:from-rose-500 hover:to-rose-400 focus:outline-none focus:ring-2 focus:ring-rose-400/50">Reset</button>
                 </div>
-                <progress id="prog" value="0" max="100" class="hidden w-full h-4 bg-gray-200 rounded-full mt-4"></progress>
+                <progress id="prog" value="0" max="100" class="hidden w-full h-2 bg-slate-700 rounded-full mt-4"></progress>
             </div>
         </div>
     </div>
-    <div id="preview-col" class="p-4 hidden h-full">
-        <div id="preview-container" class="hidden w-full h-full p-8 space-y-6 bg-white rounded-lg shadow-md">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div id="preview-col" class="p-4 hidden h-full transition-all duration-300 ease-in-out">
+        <div id="preview-container" class="hidden w-full h-full p-8 space-y-6 bg-slate-900/60 border border-slate-700 rounded-2xl shadow-lg backdrop-blur transition-all duration-300 ease-in-out">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <h2 class="text-2xl font-bold text-center mb-2">Original</h2>
+                    <h2 class="text-2xl font-bold text-center mb-2 text-slate-100">Original</h2>
                     <video id="original-video" class="w-full h-auto" controls style="margin: auto;"></video>
                 </div>
                 <div>
-                    <h2 class="text-2xl font-bold text-center mb-2">Converted</h2>
+                    <h2 class="text-2xl font-bold text-center mb-2 text-slate-100">Converted</h2>
                     <video id="converted-video" class="w-full hidden object-contain bg-black" controls style="margin: auto;"></video>
-                    <button id="downloadBtn" type="button" class="hidden w-full px-4 py-2 mt-4 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">Download</button>
+                    <button id="downloadBtn" type="button" class="hidden w-full px-4 py-2 mt-4 rounded-full bg-gradient-to-r from-indigo-600 to-blue-500 text-white shadow hover:from-indigo-500 hover:to-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/50">Download</button>
                 </div>
             </div>
         </div>
     </div>
 
 
-    <div id="notification" class="hidden fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg">
+    <div id="notification" class="hidden fixed top-4 right-4 bg-emerald-600 text-white px-6 py-3 rounded-xl shadow-lg">
         Success! Check your browser for the download.
     </div>
 
     <script>
         const originalVideo = document.getElementById('original-video');
         const convertedVideo = document.getElementById('converted-video');
+        const downloadBtn = document.getElementById('downloadBtn');
+
+        // Transition helpers for smooth show/hide
+        function ensureTransition(el) {
+            if (!el) return;
+            el.classList.add('transition-all', 'duration-300', 'ease-in-out');
+        }
+        function showEl(el) {
+            if (!el) return;
+            ensureTransition(el);
+            el.classList.add('opacity-0', 'scale-95');
+            el.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                el.classList.remove('opacity-0', 'scale-95');
+            });
+        }
+        function hideEl(el) {
+            if (!el) return;
+            ensureTransition(el);
+            el.classList.add('opacity-0', 'scale-95');
+            setTimeout(() => {
+                el.classList.add('hidden');
+            }, 250);
+        }
 
         function syncConvertedHeight() {
             const h = originalVideo.getBoundingClientRect().height;
@@ -95,23 +119,23 @@
             fileInput.value = null;
             selectedFile = null;
             fname.textContent = '';
-            startBtn.classList.add('hidden');
-            resetBtn.classList.add('hidden');
-            prog.classList.add('hidden');
+            hideEl(startBtn);
+            hideEl(resetBtn);
+            hideEl(prog);
             prog.value = 0;
-            spinner.classList.add('hidden');
+            hideEl(spinner);
 
-            document.getElementById('preview-container').classList.add('hidden');
+            hideEl(document.getElementById('preview-container'));
             const originalVideo = document.getElementById('original-video');
             const convertedVideo = document.getElementById('converted-video');
             originalVideo.src = '';
             convertedVideo.src = '';
-            convertedVideo.classList.add('hidden');
-            document.getElementById('downloadBtn').classList.add('hidden');
+            hideEl(convertedVideo);
+            hideEl(downloadBtn);
             convertedVideo.style.height = '';
 
             // Center input and collapse to one column before start
-            previewCol.classList.add('hidden');
+            hideEl(previewCol);
             appGrid.classList.remove('md:grid-cols-2');
             appGrid.classList.add('grid-cols-1', 'place-items-center');
             // restore roomy gaps for centered state
@@ -145,11 +169,10 @@
                     const convertedUrl = URL.createObjectURL(xhr.response);
                     const convertedVideo = document.getElementById('converted-video');
                     convertedVideo.src = convertedUrl;
-                    convertedVideo.classList.remove('hidden');
+                    showEl(convertedVideo);
                     syncConvertedHeight();
 
-                    const downloadBtn = document.getElementById('downloadBtn');
-                    downloadBtn.classList.remove('hidden');
+                    showEl(downloadBtn);
                     downloadBtn.onclick = () => {
                         const a = document.createElement('a');
                         a.href = convertedUrl;
@@ -163,13 +186,12 @@
                     setTimeout(() => {
                         notification.classList.add('hidden');
                     }, 3000);
-                    document.getElementById('converted-video').classList.remove('hidden');
                 } else {
                     xhr.response.text().then(t => alert(t || 'Upload failed'));
                 }
-                spinner.classList.add('hidden');
-                prog.classList.add('hidden');
-                resetBtn.classList.remove('hidden');
+                hideEl(spinner);
+                hideEl(prog);
+                showEl(resetBtn);
             };
 
             const fd = new FormData();
@@ -193,18 +215,18 @@
             const originalUrl = URL.createObjectURL(file);
             originalVideo.src = originalUrl;
 
-            document.getElementById('preview-container').classList.remove('hidden');
-            document.getElementById('converted-video').classList.remove('hidden');
-            document.getElementById('downloadBtn').classList.add('hidden');
+            showEl(document.getElementById('preview-container'));
+            showEl(document.getElementById('converted-video'));
+            hideEl(downloadBtn);
 
-            startBtn.classList.remove('hidden');
-            resetBtn.classList.remove('hidden');
+            showEl(startBtn);
+            showEl(resetBtn);
 
             // Ensure converted preview height matches original after layout
             setTimeout(syncConvertedHeight, 0);
 
             // Show preview column and switch to 2-column layout
-            previewCol.classList.remove('hidden');
+            showEl(previewCol);
             appGrid.classList.remove('place-items-center');
             appGrid.classList.add('md:grid-cols-2', 'items-stretch');
             // tighten gaps for processing layout
@@ -219,18 +241,18 @@
 
         startBtn.onclick = () => {
             if (selectedFile) {
-                spinner.classList.remove('hidden');
-                prog.classList.remove('hidden');
-                document.getElementById('converted-video').classList.add('hidden');
+                showEl(spinner);
+                showEl(prog);
+                hideEl(document.getElementById('converted-video'));
                 upload(selectedFile);
-                startBtn.classList.add('hidden');
-                resetBtn.classList.add('hidden');
+                hideEl(startBtn);
+                hideEl(resetBtn);
             }
         };
 
-        drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('border-blue-500', 'bg-blue-50'); });
-        drop.addEventListener('dragleave', () => drop.classList.remove('border-blue-500', 'bg-blue-50'));
-        drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('border-blue-500', 'bg-blue-50'); handleFile(e.dataTransfer.files[0]); });
+        drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('border-blue-400', 'bg-blue-900/20'); });
+        drop.addEventListener('dragleave', () => drop.classList.remove('border-blue-400', 'bg-blue-900/20'));
+        drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('border-blue-400', 'bg-blue-900/20'); handleFile(e.dataTransfer.files[0]); });
         fileInput.addEventListener('change', e => handleFile(e.target.files[0]));
     </script>
 </body>
