@@ -38,6 +38,7 @@ export function toVerticalCrop(input, output, w = 1080, h = 1920) {
 function run(input, output, filter_complex) {
   return new Promise((res, rej) => {
     ffmpeg(input)
+      .on("error", rej)
       .outputOptions(commonOpts)
       .complexFilter(filter_complex)
       .on("end", res)
@@ -48,6 +49,7 @@ function run(input, output, filter_complex) {
 function runVF(input, output, vf) {
   return new Promise((res, rej) => {
     ffmpeg(input)
+      .on("error", rej)
       .videoFilters(vf)
       .outputOptions(commonOpts)
       .on("end", res)
