@@ -10,9 +10,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
-<body class="font-sans bg-gray-100 text-gray-900 min-h-screen w-full p-4 sm:p-6 lg:p-8 grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
-    <div class="p-4">
-        <div class="w-full p-8 space-y-6 bg-white rounded-lg shadow-md">
+<body id="appGrid" class="font-sans bg-gray-100 text-gray-900 min-h-screen w-full p-4 sm:p-6 lg:p-8 grid grid-cols-1 gap-6 lg:gap-8 place-items-center">
+    <div class="p-4 h-full">
+        <div id="input-card" class="w-full max-w-lg mx-auto p-8 space-y-6 bg-white rounded-lg shadow-md">
             <h1 class="text-4xl font-bold text-center mb-8">Upload MP4 → 9:16</h1>
 
             <div class="p-8 border-2 border-dashed border-gray-300 rounded-lg text-center mb-6" id="drop">
@@ -37,8 +37,8 @@
             </div>
         </div>
     </div>
-    <div class="p-4">
-        <div id="preview-container" class="hidden w-full p-8 space-y-6 bg-white rounded-lg shadow-md">
+    <div id="preview-col" class="p-4 hidden h-full">
+        <div id="preview-container" class="hidden w-full h-full p-8 space-y-6 bg-white rounded-lg shadow-md">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <h2 class="text-2xl font-bold text-center mb-2">Original</h2>
@@ -73,6 +73,9 @@
         originalVideo.addEventListener('loadeddata', syncConvertedHeight);
         window.addEventListener('resize', syncConvertedHeight);
 
+        const appGrid = document.getElementById('appGrid');
+        const previewCol = document.getElementById('preview-col');
+        const inputCard = document.getElementById('input-card');
         const drop = document.getElementById('drop');
         const fileInput = document.getElementById('file');
         const pickBtn = document.getElementById('pick');
@@ -106,6 +109,21 @@
             convertedVideo.classList.add('hidden');
             document.getElementById('downloadBtn').classList.add('hidden');
             convertedVideo.style.height = '';
+
+            // Center input and collapse to one column before start
+            previewCol.classList.add('hidden');
+            appGrid.classList.remove('md:grid-cols-2');
+            appGrid.classList.add('grid-cols-1', 'place-items-center');
+            // restore roomy gaps for centered state
+            appGrid.classList.remove('gap-4');
+            appGrid.classList.add('gap-6', 'lg:gap-8');
+            // restore input card width constraints
+            inputCard.classList.add('max-w-lg', 'mx-auto');
+            // remove forced stretch in centered state
+            appGrid.classList.remove('items-stretch');
+            // allow cards to size to content when centered
+            inputCard.classList.remove('h-full');
+            document.getElementById('preview-container').classList.remove('h-full');
         }
 
         resetBtn.onclick = reset;
@@ -184,6 +202,19 @@
 
             // Ensure converted preview height matches original after layout
             setTimeout(syncConvertedHeight, 0);
+
+            // Show preview column and switch to 2-column layout
+            previewCol.classList.remove('hidden');
+            appGrid.classList.remove('place-items-center');
+            appGrid.classList.add('md:grid-cols-2', 'items-stretch');
+            // tighten gaps for processing layout
+            appGrid.classList.remove('gap-6', 'lg:gap-8');
+            appGrid.classList.add('gap-4');
+            // expand input card to full column width
+            inputCard.classList.remove('max-w-lg', 'mx-auto');
+            // make both cards fill their grid cells so heights match
+            inputCard.classList.add('h-full');
+            document.getElementById('preview-container').classList.add('h-full');
         }
 
         startBtn.onclick = () => {
