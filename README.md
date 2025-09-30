@@ -1,5 +1,3 @@
-# 垂直视频转换器 🎥✨
-
 *Tired of your landscape vids looking basic on TikTok and Reels?* 😫 *This app is the ultimate glow-up for your videos, transforming them into vertical masterpieces.* ✨
 
 ## **🚀 What's the Vibe?**
