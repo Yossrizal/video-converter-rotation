@@ -13,6 +13,7 @@ for (const dir of ["public", "uploads", "outputs"]) {
 
 // static files
 app.use(express.static(path.resolve("public")));
+app.use("/outputs", express.static("outputs"));
 
 // api routes
 app.use("/", videoRoutes);

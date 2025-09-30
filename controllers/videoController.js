@@ -3,33 +3,62 @@ import fs from "fs";
 import path from "path";
 import { toVerticalBlur, toVerticalPad, toVerticalCrop } from "../utils/ffmpeg.js";
 
-export async function handleUpload(req, res) {
-  if (!req.file) return res.status(400).send("No file uploaded");
-  const inputPath = req.file.path;
-
-  // pilih mode via query ?mode=blur|pad|crop (default: blur)
-  const mode = (req.query.mode || "blur").toLowerCase();
-  const { title, description } = req.body;
+async function processVideo(mode, inputPath, title, description) {
   const outName = `${Date.now()}-vertical.mp4`;
   const outputPath = path.join("outputs", outName);
 
-  try {
-    if (mode === "pad")      await toVerticalPad(inputPath, outputPath, title, description);
-    else if (mode === "crop")await toVerticalCrop(inputPath, outputPath, title, description);
-    else                     await toVerticalBlur(inputPath, outputPath, title, description);
+  if (mode === "pad") {
+    await toVerticalPad(inputPath, outputPath, title, description);
+  } else if (mode === "crop") {
+    await toVerticalCrop(inputPath, outputPath, title, description);
+  } else {
+    await toVerticalBlur(inputPath, outputPath, title, description);
+  }
 
-    // kirim hasil sebagai unduhan lalu bersihkan file
-    res.sendFile(outputPath, { root: '.' }, err => {
-      safeUnlink(inputPath);
-      safeUnlink(outputPath);
-      if (err) console.error(err);
+  return outputPath;
+}
+
+export async function handleUpload(req, res) {
+  if (!req.file) return res.status(400).send("No file uploaded");
+
+  const inputPath = req.file.path;
+  const mode = (req.query.mode || "blur").toLowerCase();
+  const { title, description } = req.body;
+
+  try {
+    const outputPath = await processVideo(mode, inputPath, title, description);
+    res.json({
+      outputPath: outputPath.replace(/\\/g, "/"),
+      inputPath: inputPath.replace(/\\/g, "/"),
     });
   } catch (e) {
     console.error(e);
     safeUnlink(inputPath);
-    safeUnlink(outputPath);
     res.status(500).send("Processing failed");
   }
+}
+
+export async function handleReprocess(req, res) {
+  const { inputPath, mode, title, description } = req.body;
+
+  if (!inputPath) return res.status(400).send("Missing inputPath");
+
+  try {
+    const outputPath = await processVideo(mode, inputPath, title, description);
+    res.json({
+      outputPath: outputPath.replace(/\\/g, "/"),
+      inputPath: inputPath.replace(/\\/g, "/"),
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).send("Reprocessing failed");
+  }
+}
+
+export function handleCleanup(req, res) {
+  const { inputPath } = req.body;
+  safeUnlink(inputPath);
+  res.send("Cleanup successful");
 }
 
 function safeUnlink(p) {

@@ -117,13 +117,22 @@
         const spinner = document.getElementById('spinner');
         const notification = document.getElementById('notification');
         let selectedFile = null;
+        let currentInputPath = null;
         const MAX_FILENAME_LENGTH = 30;
 
         pickBtn.onclick = () => fileInput.click();
 
         function reset() {
+            if (currentInputPath) {
+                fetch('/cleanup', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ inputPath: currentInputPath })
+                });
+            }
             fileInput.value = null;
             selectedFile = null;
+            currentInputPath = null;
             fname.textContent = '';
             hideEl(startBtn);
             hideEl(resetBtn);
@@ -158,11 +167,38 @@
 
         resetBtn.onclick = reset;
 
+        function handleSuccess(response) {
+            currentInputPath = response.inputPath;
+            convertedVideo.src = response.outputPath;
+            showEl(convertedVideo);
+            syncConvertedHeight();
+
+            showEl(downloadBtn);
+            downloadBtn.onclick = () => {
+                const a = document.createElement('a');
+                a.href = response.outputPath;
+                a.download = (selectedFile?.name || 'video').replace(/\.mp4$/i, '') + '-vertical.mp4';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            };
+
+            notification.classList.remove('hidden');
+            setTimeout(() => {
+                notification.classList.add('hidden');
+            }, 3000);
+
+            hideEl(spinner);
+            hideEl(prog);
+            showEl(startBtn);
+            showEl(resetBtn);
+        }
+
         function upload(file) {
             const xhr = new XMLHttpRequest();
             const mode = modeSel.value;
             xhr.open('POST', '/upload?mode=' + encodeURIComponent(mode));
-            xhr.responseType = 'blob';
+            xhr.responseType = 'json';
 
             xhr.upload.onprogress = (e) => {
                 if (e.lengthComputable) {
@@ -172,28 +208,9 @@
 
             xhr.onload = () => {
                 if (xhr.status === 200) {
-                    const convertedUrl = URL.createObjectURL(xhr.response);
-                    const convertedVideo = document.getElementById('converted-video');
-                    convertedVideo.src = convertedUrl;
-                    showEl(convertedVideo);
-                    syncConvertedHeight();
-
-                    showEl(downloadBtn);
-                    downloadBtn.onclick = () => {
-                        const a = document.createElement('a');
-                        a.href = convertedUrl;
-                        a.download = file.name.replace(/\.mp4$/i, '') + '-vertical.mp4';
-                        document.body.appendChild(a);
-                        a.click();
-                        a.remove();
-                    };
-
-                    notification.classList.remove('hidden');
-                    setTimeout(() => {
-                        notification.classList.add('hidden');
-                    }, 3000);
+                    handleSuccess(xhr.response);
                 } else {
-                    xhr.response.text().then(t => alert(t || 'Upload failed'));
+                    alert(xhr.response?.message || 'Upload failed');
                 }
                 hideEl(spinner);
                 hideEl(prog);
@@ -205,6 +222,33 @@
             fd.append('title', document.getElementById('title').value);
             fd.append('description', document.getElementById('description').value);
             xhr.send(fd);
+        }
+
+        function reprocess() {
+            const xhr = new XMLHttpRequest();
+            const mode = modeSel.value;
+            xhr.open('POST', '/reprocess');
+            xhr.responseType = 'json';
+            xhr.setRequestHeader('Content-Type', 'application/json');
+
+            xhr.onload = () => {
+                if (xhr.status === 200) {
+                    handleSuccess(xhr.response);
+                } else {
+                    alert(xhr.response?.message || 'Reprocessing failed');
+                }
+                hideEl(spinner);
+                hideEl(prog);
+                showEl(resetBtn);
+            };
+
+            const data = {
+                inputPath: currentInputPath,
+                mode: mode,
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value
+            };
+            xhr.send(JSON.stringify(data));
         }
 
         function handleFile(file) {
@@ -248,13 +292,17 @@
         }
 
         startBtn.onclick = () => {
-            if (selectedFile) {
-                showEl(spinner);
-                showEl(prog);
-                hideEl(document.getElementById('converted-video'));
+            showEl(spinner);
+            showEl(prog);
+            hideEl(document.getElementById('converted-video'));
+            hideEl(startBtn);
+            hideEl(resetBtn);
+            hideEl(downloadBtn);
+
+            if (currentInputPath) {
+                reprocess();
+            } else if (selectedFile) {
                 upload(selectedFile);
-                hideEl(startBtn);
-                hideEl(resetBtn);
             }
         };
 
